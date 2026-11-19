@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#06303d">
+    <title>Sistem Ujian Terpadu | Digitalisasi Pendidikan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0e7490;
+            --primary-dark: #0b5568;
+            --accent: #0f766e;
+            --danger: #dc2626;
+            --bg: #06303d;
+            --bg-deep: #041f29;
+            --text-dark: #12313b;
+            --text-light: #5b7480;
+            --line: #d8e4e9;
+            --field: #f5f9fa;
+            --white: #ffffff;
+            --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-head: 'Fraunces', Georgia, 'Times New Roman', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        html, body {
+            font-family: var(--font-body);
+            background-color: var(--bg-deep);
+            /* Menggunakan dvh agar adaptif dengan address bar Safari di iPhone */
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--text-dark);
+            /* Mencegah seleksi teks dan pop-up bawaan iOS */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            position: relative;
+            background:
+                radial-gradient(1100px 700px at 15% -10%, rgba(20, 150, 170, 0.35), transparent 60%),
+                radial-gradient(900px 600px at 100% 110%, rgba(15, 118, 110, 0.35), transparent 60%),
+                linear-gradient(160deg, var(--bg) 0%, var(--bg-deep) 100%);
+        }
+
+        /* --- LATAR PETA KONTUR (tema Geografi) --- */
+        .bg-map {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        /* Pembungkus tengah: selalu pas di tengah layar HP, tablet, maupun laptop */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding:
+                max(20px, env(safe-area-inset-top))
+                max(20px, env(safe-area-inset-right))
+                max(20px, env(safe-area-inset-bottom))
+                max(20px, env(safe-area-inset-left));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card {
+            position: relative;
+            /* margin auto = tetap di tengah, dan tetap bisa di-scroll jika layar pendek (HP landscape) */
+            margin: auto;
+            background: rgba(255, 255, 255, 0.97);
+            width: 100%;
+            max-width: 440px;
+            padding: 44px 36px 36px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 40px 80px -24px rgba(0, 0, 0, 0.55),
+                0 18px 36px -18px rgba(4, 31, 41, 0.5);
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- STYLING KHUSUS LOGO --- */
+        .logo-wrapper {
+            margin: 0 auto 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 35%, #ffffff 0%, #eaf6f8 100%);
+            box-shadow:
+                0 0 0 1px rgba(14, 116, 144, 0.14),
+                0 0 0 7px rgba(14, 116, 144, 0.06),
+                0 16px 30px -12px rgba(14, 116, 144, 0.45);
+        }
+
+        .school-logo {
+            max-width: 74%;
+            max-height: 74%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.12));
+            transition: transform 0.4s ease;
+        }
+
+        .school-logo:hover {
+            transform: scale(1.06);
+        }
+        /* --------------------------- */
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 28px;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.65;
+            margin-bottom: 26px;
+            max-width: 34ch;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .alert-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+            border: 1px solid #fcd5d5;
+            border-left: 4px solid var(--danger);
+            padding: 14px 16px;
+            text-align: left;
+            margin-bottom: 26px;
+            border-radius: 14px;
+        }
+
+        .alert-box strong {
+            color: var(--danger);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+
+        .alert-box p {
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+            max-width: none;
+            color: #8f1d1d;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s, filter 0.25s;
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.985);
+        }
+
+        .btn:focus-visible,
+        input[type="text"]:focus-visible,
+        select.select-input:focus-visible {
+            outline: 3px solid rgba(14, 116, 144, 0.35);
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: 0 10px 20px -8px rgba(14, 116, 144, 0.65);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+            box-shadow: 0 16px 26px -10px rgba(14, 116, 144, 0.75);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e11d48 0%, var(--danger) 100%);
+            color: white;
+            box-shadow: 0 10px 20px -8px rgba(220, 38, 38, 0.6);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        input[type="text"], select.select-input {
+            width: 100%;
+            padding: 15px 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            font-size: 16px; /* 16px mencegah zoom otomatis di iOS */
+            text-align: center;
+            transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
+            /* Memastikan input bisa diketik di iOS */
+            -webkit-user-select: auto;
+            user-select: auto;
+            background-color: var(--field);
+            color: var(--text-dark);
+        }
+
+        input[type="text"]::placeholder {
+            color: #8ea2ac;
+        }
+
+        #unlock-code {
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        input[type="text"]:focus, select.select-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.12);
+        }
+
+        select.select-input {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none; /* iOS Safari fallback */
+            text-align-last: center;
+            padding-left: 2.6rem;
+            padding-right: 2.6rem;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e7490' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.1em;
+        }
+
+        #exam-screen {
+            display: none;
+            position: relative;
+            z-index: 2;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: white;
+            /* Perbaikan Iframe untuk iOS Safari */
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        iframe {
+            /* Fix mutlak agar iframe tidak tumpah di iPhone */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1;
+        }
+
+        /* --- STYLING WAKTU BERJALAN (TIMER) --- */
+        .timer-container {
+            display: none;
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            right: max(12px, env(safe-area-inset-right));
+            background: rgba(6, 31, 41, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 14px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+            z-index: 9999; /* Memastikan timer berada di atas iframe soal */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            align-items: center;
+            gap: 6px;
+            pointer-events: none; /* Agar tidak mengganggu ketukan layar di dekatnya */
+        }
+
+        /* --- LAYAR TERKUNCI --- */
+        .lock-card {
+            border-top: 5px solid var(--danger);
+        }
+
+        .lock-icon {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 18px;
+            display: grid;
+            place-items: center;
+            font-size: 38px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 35%, #fff 0%, #fee2e2 100%);
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.18), 0 0 0 7px rgba(220, 38, 38, 0.06);
+        }
+
+        .lock-card h1 {
+            color: var(--danger);
+        }
+
+        .lock-card p.strong {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        /* --- RESPONSIVE UNTUK HP --- */
+        @media (max-width: 480px) {
+            .main-wrapper { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+            .card { padding: 34px 22px 26px; border-radius: 24px; }
+            h1 { font-size: 24px; }
+            .logo-wrapper { width: 100px; height: 100px; margin-bottom: 18px; }
+            .timer-container { font-size: 12px; padding: 6px 12px; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); }
+        }
+
+        /* HP posisi landscape / layar pendek */
+        @media (max-height: 560px) {
+            .card { padding-top: 26px; padding-bottom: 22px; }
+            .logo-wrapper { width: 76px; height: 76px; margin-bottom: 12px; }
+            p { margin-bottom: 16px; }
+            .alert-box { margin-bottom: 16px; }
+        }
+
+        /* Layar besar (laptop / desktop) */
+        @media (min-width: 1024px) {
+            .card { max-width: 460px; padding: 48px 42px 40px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card { animation: none; }
+            .btn, .school-logo { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Latar dekoratif peta kontur -->
+    <svg class="bg-map" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 800">
+        <defs>
+            <filter id="wobble" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.006" numOctaves="3" seed="7" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="90" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+        <g fill="none" stroke="#7fe0e8" stroke-width="1.2" filter="url(#wobble)">
+            <g opacity="0.16">
+                <ellipse cx="220" cy="180" rx="60" ry="40"/>
+                <ellipse cx="220" cy="180" rx="120" ry="82"/>
+                <ellipse cx="220" cy="180" rx="180" ry="125"/>
+                <ellipse cx="220" cy="180" rx="240" ry="168"/>
+                <ellipse cx="220" cy="180" rx="300" ry="212"/>
+                <ellipse cx="220" cy="180" rx="360" ry="256"/>
+            </g>
+            <g opacity="0.14">
+                <ellipse cx="980" cy="640" rx="50" ry="36"/>
+                <ellipse cx="980" cy="640" rx="110" ry="80"/>
+                <ellipse cx="980" cy="640" rx="170" ry="124"/>
+                <ellipse cx="980" cy="640" rx="230" ry="168"/>
+                <ellipse cx="980" cy="640" rx="290" ry="212"/>
+                <ellipse cx="980" cy="640" rx="350" ry="256"/>
+            </g>
+            <g opacity="0.1">
+                <ellipse cx="640" cy="420" rx="420" ry="300"/>
+                <ellipse cx="640" cy="420" rx="500" ry="360"/>
+            </g>
+        </g>
+    </svg>
+
+    <div id="exam-timer" class="timer-container">
+        <span>⏱️</span> <span id="timer-time">00:00:00</span>
+    </div>
+
+    <div id="start-screen" class="main-wrapper">
+        <div class="card">
+
+            <div class="logo-wrapper">
+                <img src="https://iili.io/BmLpuNj.md.png" alt="Logo Sekolah" class="school-logo">
+            </div>
+
+            <h1>Identitas Ujian</h1>
+            <p>Silakan lengkapi data diri Anda sebelum memulai ujian Pendidikan Agama Kristen Kelas 10.</p>
+
+            <div class="input-group">
+                <input type="text" id="nama-siswa" placeholder="Masukkan Nama Lengkap" autocomplete="off" required>
+            </div>
+            <div class="input-group">
+                <select id="kelas-siswa" class="select-input" required>
+                    <option value="" disabled selected>-- Pilih Kelas --</option>
+                    <option value="X">Pendidikan Agama Kristen Kelas 10</option>
+                </select>
+            </div>
+
+            <div class="alert-box">
+                <strong>INSTRUKSI PENTING:</strong>
+                <p>Sistem memiliki sensor tingkat tinggi. Dilarang me-refresh, menarik layar ke bawah, atau pindah jendela. Ujian akan otomatis TERKUNCI.</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="mulaiUjian()">Masuk</button>
+        </div>
+    </div>
+
+    <div id="exam-screen"></div>
+
+    <div id="lock-screen" class="main-wrapper" style="display: none;">
+        <div class="card lock-card">
+            <div class="lock-icon">🔒</div>
+            <h1>Ujian Terkunci</h1>
+            <p id="lock-reason">Sistem mendeteksi aktivitas Muat Ulang (Refresh) atau berpindah dari jendela ujian.</p>
+            <p class="strong">Silakan panggil pengawas untuk melanjutkan.</p>
+
+            <div class="input-group">
+                <input type="text" id="unlock-code" placeholder="KODE AKSES GURU" autocomplete="off">
+            </div>
+
+            <button class="btn btn-danger" onclick="bukaKunci()">Buka Kunci Akses</button>
+        </div>
+    </div>
+
+    <script>
+        // Mengubah parameter USP header menjadi embedded=true agar iFrame tampil sempurna
+        const URL_PAK_KELAS_10 = "https://docs.google.com/forms/d/e/1FAIpQLSdBZ7RojK5IJM83dQ9jwUgV2Asf2KNuNaOVyf2ISnSzS4tTGQ/viewform?embedded=true";
+        
+        const STORAGE_KEY = 'StatusUjian_VersiFinal_v2';
+        let statusUjian = localStorage.getItem(STORAGE_KEY) || 'awal';
+
+        // Manajemen Waktu Ujian Terintegrasi Lokal Storage
+        let detikUjian = parseInt(localStorage.getItem('DetikUjian Berjalan')) || 0;
+        let intervalTimer = null;
+
+        // SENSOR RELOAD KELAS BERAT
+        const perfEntries = performance.getEntriesByType("navigation");
+        let isReloaded = false;
+        
+        if (perfEntries.length > 0 && perfEntries[0].type === "reload") {
+            isReloaded = true;
+        } else if (window.performance && window.performance.navigation.type === 1) {
+            isReloaded = true;
+        }
+
+        if (statusUjian === 'berjalan' || (statusUjian === 'berjalan' && isReloaded)) {
+            statusUjian = 'terkunci';
+            localStorage.setItem(STORAGE_KEY, 'terkunci');
+        }
+
+        const startScreen = document.getElementById('start-screen');
+        const examScreen = document.getElementById('exam-screen');
+        const lockScreen = document.getElementById('lock-screen');
+        const codeInput = document.getElementById('unlock-code');
+        const timerContainer = document.getElementById('exam-timer');
+        const timerDisplay = document.getElementById('timer-time');
+
+        // Fungsi Interval Penghitung Waktu Ujian
+        function jalankanTimer() {
+            if (intervalTimer) clearInterval(intervalTimer);
+            intervalTimer = setInterval(() => {
+                detikUjian++;
+                localStorage.setItem('DetikUjian Berjalan', detikUjian);
+                
+                // Konversi format jam:menit:detik
+                let jam = Math.floor(detikUjian / 3600);
+                let menit = Math.floor((detikUjian % 3600) / 60);
+                let detik = detikUjian % 60;
+
+                timerDisplay.textContent = 
+                    (jam < 10 ? "0" + jam : jam) + ":" + 
+                    (menit < 10 ? "0" + menit : menit) + ":" + 
+                    (detik < 10 ? "0" + detik : detik);
+            }, 1000);
+        }
+
+        function hentikanTimer() {
+            clearInterval(intervalTimer);
+            intervalTimer = null;
+        }
+
+        function updateUI() {
+            startScreen.style.display = 'none';
+            examScreen.style.display = 'none';
+            lockScreen.style.display = 'none';
+            timerContainer.style.display = 'none';
+
+            if (statusUjian === 'terkunci') {
+                hentikanTimer();
+                lockScreen.style.display = 'flex';
+                examScreen.innerHTML = ''; 
+                tampilkanAlasanKunci();
+            } else if (statusUjian === 'berjalan') {
+                examScreen.style.display = 'block';
+                timerContainer.style.display = 'flex';
+                jalankanTimer();
+                
+                const formUrl = URL_PAK_KELAS_10;
+
+                examScreen.innerHTML = '<iframe src="' + formUrl + '" allowfullscreen></iframe>';
+            } else {
+                hentikanTimer();
+                startScreen.style.display = 'flex';
+                examScreen.innerHTML = ''; 
+                
+                const namaTersimpan = localStorage.getItem('NamaSiswa');
+                const kelasTersimpan = localStorage.getItem('KelasSiswa');
+                if(namaTersimpan) document.getElementById('nama-siswa').value = namaTersimpan;
+                if(kelasTersimpan) document.getElementById('kelas-siswa').value = kelasTersimpan;
+            }
+        }
+
+        function mulaiUjian() {
+            const nama = document.getElementById('nama-siswa').value.trim();
+            const kelas = document.getElementById('kelas-siswa').value;
+
+            if (nama === "" || kelas === "") {
+                alert("Mohon lengkapi Nama dan Kelas terlebih dahulu sebelum masuk!");
+                return;
+            }
+
+            // Tidak boleh memulai ujian dalam mode mengambang / layar terbagi
+            if (isModeMengambang()) {
+                alert("Mode mengambang / layar terbagi terdeteksi. Tutup mode tersebut dan buka browser dalam layar penuh, lalu coba lagi.");
+                return;
+            }
+
+            localStorage.setItem('NamaSiswa', nama);
+            localStorage.setItem('KelasSiswa', kelas);
+
+            statusUjian = 'berjalan';
+            localStorage.setItem(STORAGE_KEY, 'berjalan');
+            updateUI();
+        }
+
+        function lockExam() {
+            if (statusUjian === 'berjalan') {
+                statusUjian = 'terkunci';
+                localStorage.setItem(STORAGE_KEY, 'terkunci');
+                updateUI();
+            }
+        }
+
+        function bukaKunci() {
+            const input = codeInput.value.trim().toUpperCase();
+            if (input === "SAYAHEBAT") {
+                statusUjian = 'awal';
+                localStorage.setItem(STORAGE_KEY, 'awal');
+                codeInput.value = "";
+                // Reset timer kembali ke nol setelah dibuka kunci pengawas
+                detikUjian = 0;
+                localStorage.removeItem('DetikUjian Berjalan');
+                localStorage.removeItem('AlasanKunci');
+                updateUI();
+            } else {
+                alert("Kode akses salah. Hanya pengawas yang dapat membuka kunci.");
+            }
+        }
+
+        // SENSOR 3: Pindah Tab atau Keluar Layar
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                lockExam();
+            }
+        });
+
+        // SENSOR 4: Mengunci sistem DETIK ITU JUGA sebelum reload benar-benar terjadi
+        window.addEventListener("beforeunload", function (e) {
+            if (statusUjian === 'berjalan') {
+                localStorage.setItem(STORAGE_KEY, 'terkunci');
+            }
+        });
+
+        // SENSOR TAMBAHAN KHUSUS iOS (iPhone/iPad): Deteksi saat browser disembunyikan
+        window.addEventListener("pagehide", function (e) {
+            if (statusUjian === 'berjalan') {
+                localStorage.setItem(STORAGE_KEY, 'terkunci');
+            }
+        });
+
+        // SENSOR 5: Mencegah Klik Kanan
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        
+        // SENSOR 6: Mencegah Kombinasi Keyboard (F5, Ctrl+R)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
+                e.preventDefault();
+                lockExam();
+            }
+        });
+
+        // SENSOR 7: Mode Mengambang / Layar Terbagi (Floating Window, Split Screen, Pop-up View)
+        // Browser tidak bisa mendeteksi "mode mengambang" secara langsung, sehingga sensor ini
+        // membandingkan ukuran jendela browser dengan ukuran layar perangkat. Aktif di HP/tablet (layar sentuh).
+        const PERANGKAT_SENTUH = (navigator.maxTouchPoints > 0) && window.matchMedia('(pointer: coarse)').matches;
+        const TEKS_ALASAN_DEFAULT = document.getElementById('lock-reason').textContent;
+        let pelanggaranMengambang = 0;
+
+        function isModeMengambang() {
+            if (!PERANGKAT_SENTUH) return false;
+
+            const sMin = Math.min(screen.width, screen.height);
+            const sMax = Math.max(screen.width, screen.height);
+
+            // Tentukan orientasi layar saat ini
+            let landscape;
+            if (screen.orientation && screen.orientation.type) {
+                landscape = screen.orientation.type.indexOf('landscape') === 0;
+            } else if (typeof window.orientation === 'number') {
+                landscape = Math.abs(window.orientation) === 90;
+            } else {
+                landscape = window.innerWidth > window.innerHeight;
+            }
+
+            const lebarSeharusnya = landscape ? sMax : sMin;
+            const tinggiSeharusnya = landscape ? sMin : sMax;
+            const iw = window.innerWidth;
+            const ih = window.innerHeight;
+
+            // Lebar jendela jauh lebih kecil dari lebar layar = mengambang / split screen samping
+            if (iw < lebarSeharusnya * 0.9) return true;
+
+            // Tinggi jendela jauh lebih kecil = split screen atas-bawah / jendela mengambang
+            // Batas dilonggarkan saat mengetik karena keyboard layar ikut memperkecil tinggi
+            const el = document.activeElement;
+            const sedangMengetik = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.tagName === 'IFRAME');
+            if (ih < tinggiSeharusnya * (sedangMengetik ? 0.4 : 0.65)) return true;
+
+            return false;
+        }
+
+        function kunciKarenaMengambang() {
+            if (statusUjian === 'berjalan') {
+                localStorage.setItem('AlasanKunci', 'mengambang');
+                lockExam();
+            }
+        }
+
+        function tampilkanAlasanKunci() {
+            const el = document.getElementById('lock-reason');
+            if (localStorage.getItem('AlasanKunci') === 'mengambang') {
+                el.textContent = 'Sistem mendeteksi penggunaan Mode Mengambang / Layar Terbagi. Ujian tidak boleh dikerjakan dalam mode tersebut.';
+            } else {
+                el.textContent = TEKS_ALASAN_DEFAULT;
+            }
+        }
+
+        function periksaModeMengambang() {
+            if (statusUjian !== 'berjalan') {
+                pelanggaranMengambang = 0;
+                return;
+            }
+            if (isModeMengambang()) {
+                pelanggaranMengambang++;
+                // Perlu 2 deteksi berturut-turut agar tidak salah kunci saat layar berputar
+                if (pelanggaranMengambang >= 2) kunciKarenaMengambang();
+            } else {
+                pelanggaranMengambang = 0;
+            }
+        }
+
+        setInterval(periksaModeMengambang, 1000);
+        window.addEventListener('resize', function () { setTimeout(periksaModeMengambang, 300); });
+        window.addEventListener('orientationchange', function () { pelanggaranMengambang = 0; });
+        if (screen.orientation && screen.orientation.addEventListener) {
+            screen.orientation.addEventListener('change', function () { pelanggaranMengambang = 0; });
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
